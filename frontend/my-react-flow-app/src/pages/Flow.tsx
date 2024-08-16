@@ -16,11 +16,13 @@ import AgentNode from "../components/AgentNode";
 import OutputNode from "../components/OutputNode";
 import "@xyflow/react/dist/style.css";
 import { Grid } from "@mui/material";
+import ImageGenerationOutputNode from "../components/ImageGenerationOutputNode";
 
 const nodeTypes: NodeTypes = {
   inputNode: InputNode,
   agentNode: AgentNode,
   outputNode: OutputNode,
+  ImageGenerationOutputNode: ImageGenerationOutputNode,
 };
 
 type NodeData = {

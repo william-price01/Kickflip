@@ -1,7 +1,11 @@
 import { Box, Button, MenuItem, Menu } from "@mui/material";
 import React from "react";
 
-export type NodeType = "inputNode" | "agentNode" | "outputNode";
+export type NodeType =
+  | "inputNode"
+  | "agentNode"
+  | "outputNode"
+  | "ImageGenerationOutputNode";
 
 export type NodeMenuProps = {
   addNode: (type: NodeType) => void;
@@ -49,6 +53,9 @@ export default function NodeMenu({ addNode }: NodeMenuProps) {
         </MenuItem>
         <MenuItem onClick={() => handleAddNode("outputNode")}>
           Output Node
+        </MenuItem>
+        <MenuItem onClick={() => handleAddNode("ImageGenerationOutputNode")}>
+          Image Generation Output Node
         </MenuItem>
       </Menu>
     </Box>
