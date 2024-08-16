@@ -1,0 +1,5 @@
+Flask==2.2.5
+flask-cors==3.0.10
+Werkzeug==2.2.3
+griptape==0.29.1
+python-dotenv==0.19.2
