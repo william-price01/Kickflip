@@ -12,10 +12,9 @@ api_key = os.getenv('OPENAI_API_KEY')
 
 class BaseAgent:
     @staticmethod
-    def process_with_toolkit_agent(input_text, ruleset):
+    def process_with_toolkit_agent(input_text):
         agent = Agent(
             tools=[Calculator()],
-            rulesets=[],
         )
         agent.add_task(ToolkitTask(
             "Calculate the result of {{args[0]}}",
