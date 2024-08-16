@@ -6,8 +6,11 @@ import {
   Button,
   CircularProgress,
   TextField,
+  Card,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import { processWithGriptape } from "../store/api";
+import { API } from "../store/api";
 
 interface AgentNodeData {
   input?: string;
@@ -23,6 +26,9 @@ interface AgentNodeProps {
 const AgentNode: React.FC<AgentNodeProps> = ({ data, id }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [apiType, setApiType] = useState<"process" | "generateImage">(
+    "process",
+  );
 
   useEffect(() => {
     console.log(`AgentNode ${id} received new input:`, data.input);
@@ -34,18 +40,26 @@ const AgentNode: React.FC<AgentNodeProps> = ({ data, id }) => {
       console.log(`AgentNode ${id} starting to process prompt:`, prompt);
       setIsProcessing(true);
       try {
-        const result = await processWithGriptape({
-          task_type: "prompt",
-          input: prompt,
-          ruleset: data.ruleset,
-        });
+        let result;
+        if (apiType === "process") {
+          result = await API.process({
+            task_type: "prompt",
+            input: prompt,
+            ruleset: data.ruleset,
+          });
+        } else {
+          result = await API.generateImage({
+            image_prompt: prompt,
+            ruleset_input: data.ruleset || "",
+          });
+        }
         console.log(`AgentNode ${id} received processed result:`, result);
         if (data.onSubmit) {
           console.log(
             `AgentNode ${id} calling onSubmit with result:`,
-            result.result,
+            result.result || result,
           );
-          data.onSubmit(id, result.result);
+          data.onSubmit(id, result.result || result);
         } else {
           console.error(`AgentNode ${id}: onSubmit function is not defined`);
         }
@@ -63,10 +77,19 @@ const AgentNode: React.FC<AgentNodeProps> = ({ data, id }) => {
         `AgentNode ${id} attempted to process, but no prompt available`,
       );
     }
-  }, [prompt, data, id]);
+  }, [prompt, data, id, apiType]);
+
+  const handleApiTypeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newApiType: "process" | "generateImage",
+  ) => {
+    if (newApiType !== null) {
+      setApiType(newApiType);
+    }
+  };
 
   return (
-    <Box
+    <Card
       sx={{
         background: "white",
         padding: 2,
@@ -75,30 +98,48 @@ const AgentNode: React.FC<AgentNodeProps> = ({ data, id }) => {
         width: 250,
       }}
     >
-      <Handle type="target" position={Position.Top} id="ruleset" />
-      <Typography variant="h6">Agent Node</Typography>
+      <Handle type="target" position={Position.Left} id="ruleset" />
+      <Typography variant="h6" gutterBottom>
+        Agent Node
+      </Typography>
+      <ToggleButtonGroup
+        value={apiType}
+        exclusive
+        onChange={handleApiTypeChange}
+        aria-label="API Type"
+        size="small"
+        fullWidth
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="process" aria-label="Process">
+          Process
+        </ToggleButton>
+        <ToggleButton value="generateImage" aria-label="Generate Image">
+          Generate Image
+        </ToggleButton>
+      </ToggleButtonGroup>
       <TextField
         fullWidth
         variant="outlined"
-        label="Enter prompt"
+        label={apiType === "process" ? "Enter prompt" : "Enter image prompt"}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         margin="normal"
       />
-      <Typography variant="body2">
+      <Typography variant="body2" sx={{ mt: 1, mb: 2 }}>
         Ruleset: {data.ruleset || "No ruleset provided"}
       </Typography>
       <Button
         onClick={handleProcess}
         variant="contained"
         color="primary"
-        sx={{ mt: 2 }}
+        fullWidth
         disabled={isProcessing || !prompt}
       >
         {isProcessing ? <CircularProgress size={24} /> : "Process"}
       </Button>
-      <Handle type="source" position={Position.Bottom} id="output" />
-    </Box>
+      <Handle type="source" position={Position.Right} id="output" />
+    </Card>
   );
 };
 
